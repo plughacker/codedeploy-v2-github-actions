@@ -1,0 +1,32 @@
+name: 'Code deploy GitHub Actions'
+description: 'Create deployment via GitHub Actions'
+author: 'Gabriel M. Dutra <gabriel@plugpagamentos.com'
+
+inputs:
+  container_name:
+    description: 'The name of the ECS container'
+    required: true
+
+  container_port:
+    description: 'The port of the ECS container'
+    required: true
+
+  application_name:
+    description: 'The name of the Code Deploy'
+    required: true
+
+  deployment_group_name:
+    description: 'The name of the Code Deploy group name'
+    required: true
+
+  bucket_name:
+    description: 'The name of the bucket'
+    required: true
+  
+  region:
+    description: 'AWS Region'
+    required: true
+
+runs:
+  using: 'docker'
+  image: './Dockerfile'
