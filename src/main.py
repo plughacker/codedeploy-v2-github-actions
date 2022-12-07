@@ -3,7 +3,8 @@
 import boto3
 import json
 import time
-import pprint
+import sys
+import os
 
 def aws_client(resource: str):
     client = boto3.client(resource)
@@ -24,13 +25,15 @@ def get_latest_task_definition(application_name: str) -> str:
     return response["taskDefinitionArns"][0]
 
 def create_spec_content(application_name: str):
+    task_definition = get_latest_task_definition(application_name)
+
     return {
         "version": 0.0,
         "Resources": [{
             "TargetService": {
                 "Type": "AWS::ECS::Service",
                 "Properties": {
-                    "TaskDefinition": get_latest_task_definition(application_name),
+                    "TaskDefinition": task_definition,
                     "LoadBalancerInfo": {
                         "ContainerName": application_name,
                         "ContainerPort": 3000
@@ -60,28 +63,31 @@ def create_deployment(application_name: str, deployment_config_name: str) -> str
 def wait_deployment(deployment_id: str, target_id: str):
     client = aws_client("codedeploy")
 
-    deployment_status = ""
+    while True:
+        time.sleep(30)
 
-    while ecs_target["status"] == "InProgress":
         response = client.get_deployment_target(
             deploymentId=deployment_id,
             targetId=target_id
         )
 
+        ecs_target = response['deploymentTarget']['ecsTarget']
         task_info = ecs_target["taskSetsInfo"]
-        
+
         for info in task_info:
             print(json.dumps(info, indent=4))
             print("")
 
-        time.sleep(30)
-
-
-    print(target)
+        if ecs_target["status"] != "InProgress":
+            sys.exit(0)
 
 def main():
-    #deployment_id = create_deployment("poc-sre-246-dev", "CodeDeployDefault.ECSAllAtOnce")
-    wait_deployment("d-SWVT1UBHL", "plug-pagamentos-nt-dev:poc-sre-246-dev")
+    application_name = os.environ.get("INPUT_APPLICATION_NAME")
+    cluster_name = os.environ.get("INPUT_CLUSTER_NAME")
+    deployment_config_name = os.environ.get("INPUT_DEPLOYMENT_CONFIG_NAME")
+
+    deployment_id = create_deployment(application_name, deployment_config_name)
+    wait_deployment(deployment_id, f"{cluster_name}:{application_name}")
 
 if __name__ == "__main__":
     main()
