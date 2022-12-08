@@ -6,7 +6,7 @@ import time
 import sys
 import os
 
-def aws_client(resource: str):
+def aws_client(resource: str) -> object:
     client = boto3.client(resource)
     return client
 
@@ -22,7 +22,7 @@ def get_latest_task_definition(application_name: str) -> str:
 
     return response["taskDefinitionArns"][0]
 
-def create_spec_content(application_name: str):
+def create_spec_content(application_name: str) -> dict:
     task_definition = get_latest_task_definition(application_name)
 
     return {
