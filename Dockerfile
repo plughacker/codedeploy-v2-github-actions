@@ -4,4 +4,5 @@ RUN ["/bin/sh", "-c", "apk add --update --no-cache bash ca-certificates"]
 
 COPY ["src", "/src/"]
 
-ENTRYPOINT ["/src/main.py"]
+ENTRYPOINT ["python", "/src/main.py"]
+
