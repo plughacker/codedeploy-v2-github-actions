@@ -13,8 +13,6 @@ def aws_client(resource: str):
 def get_latest_task_definition(application_name: str) -> str:
     client = aws_client("ecs")
 
-    print(application_name)
-
     response = client.list_task_definitions(
         familyPrefix=application_name,
         status="ACTIVE",
